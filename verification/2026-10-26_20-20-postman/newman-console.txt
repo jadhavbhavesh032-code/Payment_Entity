@@ -1,0 +1,170 @@
+newman
+
+Payment Entity - PostgreSQL regression
+
+→ Create payment
+  POST http://localhost:9080/api/payments [201 Created, 578B, 297ms]
+  √  HTTP 201
+  √  CREATED
+
+→ Duplicate booking
+  POST http://localhost:9080/api/payments [409 Conflict, 298B, 15ms]
+  √  HTTP 409
+
+→ Invalid negative amount and IDs
+  POST http://localhost:9080/api/payments [400 Bad Request, 390B, 12ms]
+  √  HTTP 400
+
+→ Unknown JSON property
+  POST http://localhost:9080/api/payments [400 Bad Request, 267B, 9ms]
+  √  HTTP 400
+
+→ Invalid pagination
+  GET http://localhost:9080/api/payments?size=101 [400 Bad Request, 303B, 16ms]
+  √  HTTP 400
+
+→ Invalid sort
+  GET http://localhost:9080/api/payments?sort=unknown,desc [400 Bad Request, 258B, 5ms]
+  √  HTTP 400
+
+→ Invalid enum
+  POST http://localhost:9080/api/payments/4/transactions [400 Bad Request, 267B, 17ms]
+  √  HTTP 400
+
+→ Missing idempotency header
+  POST http://localhost:9080/api/payments/4/transactions [400 Bad Request, 254B, 6ms]
+  √  HTTP 400
+
+→ Blank idempotency header
+  POST http://localhost:9080/api/payments/4/transactions [400 Bad Request, 319B, 10ms]
+  √  HTTP 400
+
+→ Oversized idempotency header
+  POST http://localhost:9080/api/payments/4/transactions [400 Bad Request, 332B, 7ms]
+  √  HTTP 400
+
+→ Refund before payment
+  POST http://localhost:9080/api/payments/4/refunds [409 Conflict, 298B, 92ms]
+  √  HTTP 409
+
+→ Process payment
+  POST http://localhost:9080/api/payments/4/transactions [201 Created, 700B, 178ms]
+  √  HTTP 201
+  √  SUCCESS
+
+→ Replay payment
+  POST http://localhost:9080/api/payments/4/transactions [200 OK, 694B, 12ms]
+  √  HTTP 200
+  √  Same transaction
+
+→ Conflicting payment replay
+  POST http://localhost:9080/api/payments/4/transactions [409 Conflict, 301B, 12ms]
+  √  HTTP 409
+
+→ Prevent second charge
+  POST http://localhost:9080/api/payments/4/transactions [409 Conflict, 296B, 15ms]
+  √  HTTP 409
+
+→ Read paid payment
+  GET http://localhost:9080/api/payments/4 [200 OK, 590B, 17ms]
+  √  HTTP 200
+  √  PAID and amount 500
+
+→ Missing refund header
+  POST http://localhost:9080/api/payments/4/refunds [400 Bad Request, 254B, 3ms]
+  √  HTTP 400
+
+→ Invalid refund
+  POST http://localhost:9080/api/payments/4/refunds [400 Bad Request, 353B, 6ms]
+  √  HTTP 400
+
+→ Partial refund
+  POST http://localhost:9080/api/payments/4/refunds [201 Created, 743B, 68ms]
+  √  HTTP 201
+  √  COMPLETED
+
+→ Replay refund
+  POST http://localhost:9080/api/payments/4/refunds [200 OK, 737B, 23ms]
+  √  HTTP 200
+  √  Same refund
+
+→ Conflicting refund replay
+  POST http://localhost:9080/api/payments/4/refunds [409 Conflict, 300B, 12ms]
+  √  HTTP 409
+
+→ Over-refund rejected
+  POST http://localhost:9080/api/payments/4/refunds [409 Conflict, 313B, 12ms]
+  √  HTTP 409
+
+→ Read partially refunded
+  GET http://localhost:9080/api/payments/4 [200 OK, 601B, 10ms]
+  √  HTTP 200
+  √  PARTIALLY_REFUNDED
+
+→ Refund remaining balance
+  POST http://localhost:9080/api/payments/4/refunds [201 Created, 734B, 34ms]
+  √  HTTP 201
+
+→ Read fully refunded
+  GET http://localhost:9080/api/payments/4 [200 OK, 594B, 8ms]
+  √  HTTP 200
+  √  REFUNDED
+
+→ Reject refund after full refund
+  POST http://localhost:9080/api/payments/4/refunds [409 Conflict, 299B, 12ms]
+  √  HTTP 409
+
+→ Transaction history has one charge
+  GET http://localhost:9080/api/payments/4/transactions [200 OK, 693B, 42ms]
+  √  HTTP 200
+  √  One transaction
+
+→ Refund history has two refunds
+  GET http://localhost:9080/api/payments/4/refunds [200 OK, 1.15kB, 19ms]
+  √  HTTP 200
+  √  Two refunds
+
+→ Read transaction
+  GET http://localhost:9080/api/payments/4/transactions/4 [200 OK, 690B, 10ms]
+  √  HTTP 200
+
+→ Read refund
+  GET http://localhost:9080/api/payments/4/refunds/5 [200 OK, 708B, 18ms]
+  √  HTTP 200
+
+→ Read by booking
+  GET http://localhost:9080/api/payments/booking/1793026250288 [200 OK, 594B, 12ms]
+  √  HTTP 200
+
+→ Reject cancelling refunded payment
+  POST http://localhost:9080/api/payments/4/cancel [409 Conflict, 294B, 6ms]
+  √  HTTP 409
+
+→ Missing payment
+  GET http://localhost:9080/api/payments/9223372036854775807 [404 Not Found, 291B, 7ms]
+  √  HTTP 404
+
+→ OpenAPI required idempotency headers
+  GET http://localhost:9080/v3/api-docs [200 OK, 12.88kB, 562ms]
+  √  HTTP 200
+  √  Required headers and examples
+
+┌─────────────────────────┬───────────────────┬───────────────────┐
+│                         │          executed │            failed │
+├─────────────────────────┼───────────────────┼───────────────────┤
+│              iterations │                 1 │                 0 │
+├─────────────────────────┼───────────────────┼───────────────────┤
+│                requests │                34 │                 0 │
+├─────────────────────────┼───────────────────┼───────────────────┤
+│            test-scripts │                34 │                 0 │
+├─────────────────────────┼───────────────────┼───────────────────┤
+│      prerequest-scripts │                34 │                 0 │
+├─────────────────────────┼───────────────────┼───────────────────┤
+│              assertions │                45 │                 0 │
+├─────────────────────────┴───────────────────┴───────────────────┤
+│ total run duration: 4.4s                                        │
+├─────────────────────────────────────────────────────────────────┤
+│ total data received: 22.93kB (approx)                           │
+├─────────────────────────────────────────────────────────────────┤
+│ average response time: 46ms [min: 3ms, max: 562ms, s.d.: 106ms] │
+└─────────────────────────────────────────────────────────────────┘

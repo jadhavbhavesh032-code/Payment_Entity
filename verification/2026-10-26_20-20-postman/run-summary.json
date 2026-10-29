@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "startedIST": "2026-10-26T20:20:50.272000+05:30",
+  "durationSeconds": 4.417,
+  "requests": {
+    "total": 34,
+    "pending": 0,
+    "failed": 0
+  },
+  "assertions": {
+    "total": 45,
+    "pending": 0,
+    "failed": 0
+  },
+  "failureCount": 0,
+  "testRecords": {
+    "paymentId": 4,
+    "bookingId": 1793026250288,
+    "transactionId": 4,
+    "refundIds": [
+      5,
+      6
+    ]
+  }
+}

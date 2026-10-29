@@ -1,0 +1,1074 @@
+{
+  "info": {
+    "name": "Payment Entity - PostgreSQL regression",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Local mock gateway tests. Creates and retains identifiable test financial records. No credentials required. Run in order."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:9080"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (pm.info.requestName === 'Create payment') { pm.collectionVariables.set('runId', pm.variables.replaceIn('{{$guid}}')); pm.collectionVariables.set('bookingId', String(Date.now())); }"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Create payment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/payments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"bookingId\": {{bookingId}}, \"userId\": 1, \"bookingAmount\": 500, \"discountAmount\": 0, \"currency\": \"INR\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+              "const b = pm.response.json();",
+              "pm.test(\"CREATED\", () => { pm.expect(b.data.paymentStatus).to.eql('CREATED'); });",
+              "if (pm.response.code === 201) pm.collectionVariables.set('paymentId', b.data.paymentId);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Duplicate booking",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/payments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"bookingId\": {{bookingId}}, \"userId\": 1, \"bookingAmount\": 500, \"discountAmount\": 0, \"currency\": \"INR\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', () => pm.response.to.have.status(409));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invalid negative amount and IDs",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/payments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"bookingId\": -1, \"userId\": 0, \"bookingAmount\": -10}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Unknown JSON property",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/payments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"bookingId\": \"{{bookingId}}\", \"userId\": 1, \"bookingAmount\": 500, \"discountAmount\": 0, \"currency\": \"INR\", \"unexpected\": true}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invalid pagination",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/payments?size=101"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invalid sort",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/payments?sort=unknown,desc"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invalid enum",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{runId}}-invalid"
+          }
+        ],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}/transactions",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"paymentMethod\": \"INVALID\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Missing idempotency header",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}/transactions",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"paymentMethod\": \"UPI\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Blank idempotency header",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": " "
+          }
+        ],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}/transactions",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"paymentMethod\": \"UPI\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Oversized idempotency header",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        ],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}/transactions",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"paymentMethod\": \"UPI\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Refund before payment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{runId}}-early"
+          }
+        ],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}/refunds",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"refundAmount\": 10, \"refundReason\": \"Too early\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', () => pm.response.to.have.status(409));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Process payment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{runId}}-pay"
+          }
+        ],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}/transactions",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"paymentMethod\": \"UPI\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+              "const b = pm.response.json();",
+              "pm.test(\"SUCCESS\", () => { pm.expect(b.data.transactionStatus).to.eql('SUCCESS'); });",
+              "if (pm.response.code === 201) pm.collectionVariables.set('transactionId', b.data.transactionId);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Replay payment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{runId}}-pay"
+          }
+        ],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}/transactions",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"paymentMethod\": \"UPI\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "pm.test(\"Same transaction\", () => { pm.expect(String(b.data.transactionId)).to.eql(String(pm.collectionVariables.get('transactionId'))); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Conflicting payment replay",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{runId}}-pay"
+          }
+        ],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}/transactions",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"paymentMethod\": \"CARD\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', () => pm.response.to.have.status(409));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Prevent second charge",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{runId}}-second"
+          }
+        ],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}/transactions",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"paymentMethod\": \"UPI\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', () => pm.response.to.have.status(409));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Read paid payment",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "pm.test(\"PAID and amount 500\", () => { pm.expect(b.data.paymentStatus).to.eql('PAID'); pm.expect(Number(b.data.amountPaid)).to.eql(500); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Missing refund header",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}/refunds",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"refundAmount\": 100, \"refundReason\": \"Test\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invalid refund",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{runId}}-invalid-refund"
+          }
+        ],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}/refunds",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"refundAmount\": -1, \"refundReason\": \"\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Partial refund",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{runId}}-refund"
+          }
+        ],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}/refunds",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"refundAmount\": 100, \"refundReason\": \"Test cancellation\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+              "const b = pm.response.json();",
+              "pm.test(\"COMPLETED\", () => { pm.expect(b.data.refundStatus).to.eql('COMPLETED'); });",
+              "if (pm.response.code === 201) pm.collectionVariables.set('refundId', b.data.refundId);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Replay refund",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{runId}}-refund"
+          }
+        ],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}/refunds",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"refundAmount\": 100, \"refundReason\": \"Test cancellation\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "pm.test(\"Same refund\", () => { pm.expect(String(b.data.refundId)).to.eql(String(pm.collectionVariables.get('refundId'))); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Conflicting refund replay",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{runId}}-refund"
+          }
+        ],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}/refunds",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"refundAmount\": 101, \"refundReason\": \"Test cancellation\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', () => pm.response.to.have.status(409));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Over-refund rejected",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{runId}}-over"
+          }
+        ],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}/refunds",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"refundAmount\": 401, \"refundReason\": \"Too much\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', () => pm.response.to.have.status(409));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Read partially refunded",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "pm.test(\"PARTIALLY_REFUNDED\", () => { pm.expect(b.data.paymentStatus).to.eql('PARTIALLY_REFUNDED'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Refund remaining balance",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{runId}}-remaining"
+          }
+        ],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}/refunds",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"refundAmount\": 400, \"refundReason\": \"Remaining balance\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Read fully refunded",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "pm.test(\"REFUNDED\", () => { pm.expect(b.data.paymentStatus).to.eql('REFUNDED'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reject refund after full refund",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{runId}}-late"
+          }
+        ],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}/refunds",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"refundAmount\": 1, \"refundReason\": \"Too late\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', () => pm.response.to.have.status(409));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transaction history has one charge",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}/transactions"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "pm.test(\"One transaction\", () => { pm.expect(b.data.length).to.eql(1); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Refund history has two refunds",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}/refunds"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "pm.test(\"Two refunds\", () => { pm.expect(b.data.length).to.eql(2); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Read transaction",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}/transactions/{{transactionId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Read refund",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}/refunds/{{refundId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Read by booking",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/payments/booking/{{bookingId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reject cancelling refunded payment",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/api/payments/{{paymentId}}/cancel"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 409', () => pm.response.to.have.status(409));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Missing payment",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/payments/9223372036854775807"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 404', () => pm.response.to.have.status(404));",
+              "const b = pm.response.json();"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "OpenAPI required idempotency headers",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/v3/api-docs"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "const b = pm.response.json();",
+              "pm.test(\"Required headers and examples\", () => { ['transactions','refunds'].forEach(endpoint => { const op = b.paths['/api/payments/{paymentId}/' + endpoint].post; pm.expect(op.parameters.find(p => p.name === 'Idempotency-Key').required).to.eql(true); pm.expect(op.requestBody.content['application/json'].example).to.exist; }); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

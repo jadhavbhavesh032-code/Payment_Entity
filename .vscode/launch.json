@@ -1,0 +1,29 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Payment Entity (PostgreSQL)",
+            "request": "launch",
+            "mainClass": "com.moviebooking.MovieBookingSystemApplication",
+            "projectName": "movie-booking-system",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "env": {
+                "SPRING_PROFILES_ACTIVE": "postgres",
+                "DB_URL": "jdbc:postgresql://localhost:5432/payment_entity_db",
+                "DB_USERNAME": "postgres",
+                "DB_PASSWORD": "${input:postgresPassword}",
+                "SERVER_PORT": "9080"
+            }
+        }
+    ],
+    "inputs": [
+        {
+            "id": "postgresPassword",
+            "type": "promptString",
+            "description": "PostgreSQL password for local user postgres",
+            "password": true
+        }
+    ]
+}

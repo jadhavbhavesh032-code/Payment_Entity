@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Payment Entity - PostgreSQL regression" tests="34" time="1.584">
+  <testsuite name="Create payment" id="2b02f203-c968-4144-b1be-a89e06464e91" timestamp="2026-10-26T14:50:50.272Z" tests="2" failures="0" errors="0" time="0.297">
+    <testcase name="HTTP 201" time="0.297" classname="CreatePayment"/>
+    <testcase name="CREATED" time="0.297" classname="CreatePayment"/>
+  </testsuite>
+  <testsuite name="Duplicate booking" id="2364f17d-e278-4249-a2fb-00a985b062f9" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.015">
+    <testcase name="HTTP 409" time="0.015" classname="DuplicateBooking"/>
+  </testsuite>
+  <testsuite name="Invalid negative amount and IDs" id="d008fe3c-1406-4612-beef-5566d6bf5d19" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.012">
+    <testcase name="HTTP 400" time="0.012" classname="InvalidNegativeAmountAndIDs"/>
+  </testsuite>
+  <testsuite name="Unknown JSON property" id="e2abd72b-5c3b-4244-ba78-6d37a94601cd" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.009">
+    <testcase name="HTTP 400" time="0.009" classname="UnknownJsonProperty"/>
+  </testsuite>
+  <testsuite name="Invalid pagination" id="b60056fc-cc07-4ca2-9bb2-b42562ffa5e8" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.016">
+    <testcase name="HTTP 400" time="0.016" classname="InvalidPagination"/>
+  </testsuite>
+  <testsuite name="Invalid sort" id="acfd9dc0-925b-427e-a2e7-8c4c67a79b20" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.005">
+    <testcase name="HTTP 400" time="0.005" classname="InvalidSort"/>
+  </testsuite>
+  <testsuite name="Invalid enum" id="eaecec26-0120-4312-8940-98f987d530f8" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.017">
+    <testcase name="HTTP 400" time="0.017" classname="InvalidEnum"/>
+  </testsuite>
+  <testsuite name="Missing idempotency header" id="eaacf2d4-1425-499f-8387-e73866f5912e" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.006">
+    <testcase name="HTTP 400" time="0.006" classname="MissingIdempotencyHeader"/>
+  </testsuite>
+  <testsuite name="Blank idempotency header" id="724ad199-12cc-47b0-98e7-db5eb298e6bf" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.010">
+    <testcase name="HTTP 400" time="0.010" classname="BlankIdempotencyHeader"/>
+  </testsuite>
+  <testsuite name="Oversized idempotency header" id="d4c29788-1a16-4394-bfef-1b63a5b25f11" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.007">
+    <testcase name="HTTP 400" time="0.007" classname="OversizedIdempotencyHeader"/>
+  </testsuite>
+  <testsuite name="Refund before payment" id="d48842ea-6b5f-4444-8918-ed6f3302d28c" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.092">
+    <testcase name="HTTP 409" time="0.092" classname="RefundBeforePayment"/>
+  </testsuite>
+  <testsuite name="Process payment" id="1d16b642-cf72-42f9-b073-8afff9bb1ad5" timestamp="2026-10-26T14:50:50.272Z" tests="2" failures="0" errors="0" time="0.178">
+    <testcase name="HTTP 201" time="0.178" classname="ProcessPayment"/>
+    <testcase name="SUCCESS" time="0.178" classname="ProcessPayment"/>
+  </testsuite>
+  <testsuite name="Replay payment" id="b969f161-d981-4d99-b1f8-81aebfa23ccd" timestamp="2026-10-26T14:50:50.272Z" tests="2" failures="0" errors="0" time="0.012">
+    <testcase name="HTTP 200" time="0.012" classname="ReplayPayment"/>
+    <testcase name="Same transaction" time="0.012" classname="ReplayPayment"/>
+  </testsuite>
+  <testsuite name="Conflicting payment replay" id="99956fb4-b1ee-416a-a8c2-dcabd9bd67f9" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.012">
+    <testcase name="HTTP 409" time="0.012" classname="ConflictingPaymentReplay"/>
+  </testsuite>
+  <testsuite name="Prevent second charge" id="f61cad9d-b857-48f6-988a-825b4d1aaf1d" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.015">
+    <testcase name="HTTP 409" time="0.015" classname="PreventSecondCharge"/>
+  </testsuite>
+  <testsuite name="Read paid payment" id="ac150c5b-4cc5-4d22-9f8b-a8a6ed8a83af" timestamp="2026-10-26T14:50:50.272Z" tests="2" failures="0" errors="0" time="0.017">
+    <testcase name="HTTP 200" time="0.017" classname="ReadPaidPayment"/>
+    <testcase name="PAID and amount 500" time="0.017" classname="ReadPaidPayment"/>
+  </testsuite>
+  <testsuite name="Missing refund header" id="ce70a484-2695-4bc7-b85f-3fef42b0993d" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.003">
+    <testcase name="HTTP 400" time="0.003" classname="MissingRefundHeader"/>
+  </testsuite>
+  <testsuite name="Invalid refund" id="5f652a4b-e300-4ee8-8425-e48df6b69942" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.006">
+    <testcase name="HTTP 400" time="0.006" classname="InvalidRefund"/>
+  </testsuite>
+  <testsuite name="Partial refund" id="89bbd07d-9f7f-402f-a09c-378d30d59075" timestamp="2026-10-26T14:50:50.272Z" tests="2" failures="0" errors="0" time="0.068">
+    <testcase name="HTTP 201" time="0.068" classname="PartialRefund"/>
+    <testcase name="COMPLETED" time="0.068" classname="PartialRefund"/>
+  </testsuite>
+  <testsuite name="Replay refund" id="fcaf899d-970e-4722-9cbd-04c4ec018285" timestamp="2026-10-26T14:50:50.272Z" tests="2" failures="0" errors="0" time="0.023">
+    <testcase name="HTTP 200" time="0.023" classname="ReplayRefund"/>
+    <testcase name="Same refund" time="0.023" classname="ReplayRefund"/>
+  </testsuite>
+  <testsuite name="Conflicting refund replay" id="7f3adefd-d384-4b9f-88c7-f2c8c6f8a094" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.012">
+    <testcase name="HTTP 409" time="0.012" classname="ConflictingRefundReplay"/>
+  </testsuite>
+  <testsuite name="Over-refund rejected" id="c2749cde-c0ba-4c92-93dd-2fe8d97fdb1e" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.012">
+    <testcase name="HTTP 409" time="0.012" classname="OverRefundRejected"/>
+  </testsuite>
+  <testsuite name="Read partially refunded" id="f0590fc4-530b-48e5-8d65-d680a9a0edcc" timestamp="2026-10-26T14:50:50.272Z" tests="2" failures="0" errors="0" time="0.010">
+    <testcase name="HTTP 200" time="0.010" classname="ReadPartiallyRefunded"/>
+    <testcase name="PARTIALLY_REFUNDED" time="0.010" classname="ReadPartiallyRefunded"/>
+  </testsuite>
+  <testsuite name="Refund remaining balance" id="f0c56094-d32e-4092-ab5a-35e42a977d68" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.034">
+    <testcase name="HTTP 201" time="0.034" classname="RefundRemainingBalance"/>
+  </testsuite>
+  <testsuite name="Read fully refunded" id="8e59796f-5569-4437-96e0-9bcc97a0f53f" timestamp="2026-10-26T14:50:50.272Z" tests="2" failures="0" errors="0" time="0.008">
+    <testcase name="HTTP 200" time="0.008" classname="ReadFullyRefunded"/>
+    <testcase name="REFUNDED" time="0.008" classname="ReadFullyRefunded"/>
+  </testsuite>
+  <testsuite name="Reject refund after full refund" id="4ac4d29a-c768-4bc5-9b29-cebdafa49f2a" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.012">
+    <testcase name="HTTP 409" time="0.012" classname="RejectRefundAfterFullRefund"/>
+  </testsuite>
+  <testsuite name="Transaction history has one charge" id="5982264d-dff4-4f69-a772-6f6b6d1edf5f" timestamp="2026-10-26T14:50:50.272Z" tests="2" failures="0" errors="0" time="0.042">
+    <testcase name="HTTP 200" time="0.042" classname="TransactionHistoryHasOneCharge"/>
+    <testcase name="One transaction" time="0.042" classname="TransactionHistoryHasOneCharge"/>
+  </testsuite>
+  <testsuite name="Refund history has two refunds" id="d042dd6f-4f9a-46d3-9d80-78529ab6d2f2" timestamp="2026-10-26T14:50:50.272Z" tests="2" failures="0" errors="0" time="0.019">
+    <testcase name="HTTP 200" time="0.019" classname="RefundHistoryHasTwoRefunds"/>
+    <testcase name="Two refunds" time="0.019" classname="RefundHistoryHasTwoRefunds"/>
+  </testsuite>
+  <testsuite name="Read transaction" id="ce77a6c5-0f9f-4090-b7e9-c6af67f52dc5" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.010">
+    <testcase name="HTTP 200" time="0.010" classname="ReadTransaction"/>
+  </testsuite>
+  <testsuite name="Read refund" id="3fab8642-ca3f-4713-9355-7ca170d92dbe" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.018">
+    <testcase name="HTTP 200" time="0.018" classname="ReadRefund"/>
+  </testsuite>
+  <testsuite name="Read by booking" id="dbddb6f5-5019-4399-a3dc-38a909705efe" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.012">
+    <testcase name="HTTP 200" time="0.012" classname="ReadByBooking"/>
+  </testsuite>
+  <testsuite name="Reject cancelling refunded payment" id="e22f2886-30e7-4d47-a400-088167e2a26c" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.006">
+    <testcase name="HTTP 409" time="0.006" classname="RejectCancellingRefundedPayment"/>
+  </testsuite>
+  <testsuite name="Missing payment" id="a98ab031-91f7-4b86-93aa-2589e84df294" timestamp="2026-10-26T14:50:50.272Z" tests="1" failures="0" errors="0" time="0.007">
+    <testcase name="HTTP 404" time="0.007" classname="MissingPayment"/>
+  </testsuite>
+  <testsuite name="OpenAPI required idempotency headers" id="fd28678c-a152-4c6e-9835-8582c8504111" timestamp="2026-10-26T14:50:50.272Z" tests="2" failures="0" errors="0" time="0.562">
+    <testcase name="HTTP 200" time="0.562" classname="OpenApiRequiredIdempotencyHeaders"/>
+    <testcase name="Required headers and examples" time="0.562" classname="OpenApiRequiredIdempotencyHeaders"/>
+  </testsuite>
+</testsuites>

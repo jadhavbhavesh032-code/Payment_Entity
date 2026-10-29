@@ -1,0 +1,34 @@
+ payment_id |  booking_id   | payment_status | final_amount | amount_paid 
+------------+---------------+----------------+--------------+-------------
+          4 | 1793026250288 | REFUNDED       |       500.00 |      500.00
+(1 row)
+
+ transaction_id | payment_id | transaction_status | transaction_amount | attempt_number 
+----------------+------------+--------------------+--------------------+----------------
+              4 |          4 | SUCCESS            |             500.00 |              1
+(1 row)
+
+ refund_id | payment_id | refund_status | refund_amount 
+-----------+------------+---------------+---------------
+         5 |          4 | COMPLETED     |        100.00
+         6 |          4 | COMPLETED     |        400.00
+(2 rows)
+
+ refund_count | total_completed_refunds 
+--------------+-------------------------
+            2 |                  500.00
+(1 row)
+
+ version | success 
+---------+---------
+ 1       | t
+ 2       | t
+(2 rows)
+
+{
+  "groups": [
+    "liveness",
+    "readiness"
+  ],
+  "status": "UP"
+}

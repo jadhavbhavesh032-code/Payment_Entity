@@ -1,0 +1,23 @@
+ payment_id |  booking_id   | payment_status | amount_paid 
+------------+---------------+----------------+-------------
+          1 |          1001 | PAID           |      500.00
+          2 | 1793015875686 | REFUNDED       |      500.00
+          3 | 1793016042690 | REFUNDED       |      500.00
+(3 rows)
+
+ transactions 
+--------------
+            3
+(1 row)
+
+ refunds 
+---------
+       4
+(1 row)
+
+ version | success 
+---------+---------
+ 1       | t
+ 2       | t
+(2 rows)
+
