@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +24,8 @@ import com.moviebooking.payment.repository.RefundRepository;
 
 @Service
 public class RefundService implements RefundServiceOperations {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RefundService.class);
 
     private static final BigDecimal ZERO_MONEY = new BigDecimal("0.00");
     private static final List<RefundStatus> RESERVED_STATUSES = List.of(
@@ -70,10 +75,14 @@ public class RefundService implements RefundServiceOperations {
                 refundReason
         );
         if (!reservation.created()) {
+            LOGGER.info("Refund replay paymentId={} refundId={}",
+                    paymentId, reservation.refund().getRefundId());
             return new IdempotentResult<>(reservation.refund(), false);
         }
 
         RefundResponse processingRefund = reservation.refund();
+        LOGGER.info("Refund reserved paymentId={} refundId={}",
+                paymentId, processingRefund.getRefundId());
         RefundGatewayResult gatewayResult = refundGateway.processRefund(
                 reservation.originalGatewayTransactionId(),
                 processingRefund.getRefundAmount()
@@ -85,6 +94,15 @@ public class RefundService implements RefundServiceOperations {
                 processingRefund.getRefundId(),
                 gatewayResult
         );
+        if (completedRefund.getRefundStatus() == RefundStatus.FAILED) {
+            LOGGER.warn("Refund completed paymentId={} refundId={} status={} paymentStatus={}",
+                    paymentId, completedRefund.getRefundId(), completedRefund.getRefundStatus(),
+                    completedRefund.getPaymentStatus());
+        } else {
+            LOGGER.info("Refund completed paymentId={} refundId={} status={} paymentStatus={}",
+                    paymentId, completedRefund.getRefundId(), completedRefund.getRefundStatus(),
+                    completedRefund.getPaymentStatus());
+        }
         return new IdempotentResult<>(completedRefund, true);
     }
 

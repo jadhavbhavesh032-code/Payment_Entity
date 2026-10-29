@@ -2,6 +2,9 @@ package com.moviebooking.payment.services;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +21,8 @@ import com.moviebooking.payment.repository.PaymentTransactionRepository;
 @Service
 public class PaymentTransactionService
         implements PaymentTransactionServiceOperations {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PaymentTransactionService.class);
 
     private final PaymentRepository paymentRepository;
     private final PaymentTransactionRepository transactionRepository;
@@ -55,6 +60,8 @@ public class PaymentTransactionService
                 );
 
         if (!reservation.created()) {
+            LOGGER.info("Payment replay paymentId={} transactionId={}",
+                    paymentId, reservation.transaction().getTransactionId());
             return new IdempotentResult<>(
                     reservation.transaction(),
                     false
@@ -62,6 +69,8 @@ public class PaymentTransactionService
         }
 
         PaymentTransactionResponse pending = reservation.transaction();
+        LOGGER.info("Payment attempt reserved paymentId={} transactionId={}",
+                paymentId, pending.getTransactionId());
         PaymentGatewayResult gatewayResult = paymentGateway.processPayment(
                 pending.getTransactionAmount(),
                 pending.getPaymentMethod()
@@ -75,6 +84,13 @@ public class PaymentTransactionService
                         gatewayResult
                 );
 
+        if (completed.getTransactionStatus() == TransactionStatus.FAILED) {
+            LOGGER.warn("Payment attempt completed paymentId={} transactionId={} status={}",
+                    paymentId, completed.getTransactionId(), completed.getTransactionStatus());
+        } else {
+            LOGGER.info("Payment attempt completed paymentId={} transactionId={} status={}",
+                    paymentId, completed.getTransactionId(), completed.getTransactionStatus());
+        }
         return new IdempotentResult<>(completed, true);
     }
 

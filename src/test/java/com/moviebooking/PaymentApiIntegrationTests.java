@@ -29,7 +29,10 @@ class PaymentApiIntegrationTests {
         if (body != null) builder.header("Content-Type", "application/json");
         builder.method(method, body == null ? HttpRequest.BodyPublishers.noBody()
                 : HttpRequest.BodyPublishers.ofString(body));
-        return client.send(builder.build(), HttpResponse.BodyHandlers.ofString());
+        var response = client.send(builder.build(), HttpResponse.BodyHandlers.ofString());
+        String requestId = response.headers().firstValue("X-Request-ID").orElseThrow();
+        assertNotNull(UUID.fromString(requestId));
+        return response;
     }
 
     private JsonNode expect(int status, HttpResponse<String> response) {

@@ -7,12 +7,17 @@ import java.time.ZoneOffset;
 import java.util.Locale;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import com.moviebooking.common.api.PageResponse;
 import com.moviebooking.common.exception.BadRequestException;
@@ -29,6 +34,8 @@ import jakarta.persistence.EntityManager;
 @Service
 @Transactional
 public class PaymentService implements PaymentServiceOperations {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PaymentService.class);
 
     private static final BigDecimal ZERO_MONEY = new BigDecimal("0.00");
     private static final int MAX_PAGE_SIZE = 100;
@@ -141,6 +148,14 @@ public class PaymentService implements PaymentServiceOperations {
 
         Payment savedPayment = paymentRepository.saveAndFlush(payment);
         entityManager.refresh(savedPayment);
+        Long savedId = savedPayment.getPaymentId();
+        PaymentStatus savedStatus = savedPayment.getPaymentStatus();
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                LOGGER.info("Payment created paymentId={} status={}", savedId, savedStatus);
+            }
+        });
         return PaymentResponse.fromEntity(savedPayment);
     }
 
