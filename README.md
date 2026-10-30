@@ -1,5 +1,21 @@
 # Payment_Entity
 
+## Deploy to Render
+
+[Deploy to Render](https://render.com/deploy?repo=https://github.com/jadhavbhavesh032-code/Payment_Entity)
+
+The root `render.yaml` creates a free Docker web service and a free PostgreSQL
+database in Singapore. In Render, create a Blueprint from this repository and
+deploy it. Java 25 is built into the Docker image; database credentials are wired
+automatically. Flyway applies the schema on startup.
+
+After deployment, open `/swagger-ui/index.html` to test the API and
+`/actuator/health` to check readiness. These are appended to the service URL
+assigned by Render. This application uses mock payment gateways.
+
+Render's free web service sleeps after 15 idle minutes, and the free PostgreSQL
+database expires after 30 days. See https://render.com/docs/free.
+
 ## Logging
 
 Spring Boot's SLF4J/Logback logging writes to the console and

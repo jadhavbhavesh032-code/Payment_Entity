@@ -1,0 +1,10 @@
+.git
+.github
+.vscode
+target
+data
+logs
+verification
+*.log
+.env
+.env.*
